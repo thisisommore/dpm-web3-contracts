@@ -2,6 +2,7 @@
   "name": "hardhat-project",
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^1.0.2",
+    "@types/js-yaml": "^4.0.5",
     "hardhat": "^2.11.0"
   },
   "scripts": {
@@ -9,5 +10,8 @@
     "test": "hardhat test",
     "deploy": "hardhat run scripts/deploy.ts --network $NETWORK",
     "verify": "npx hardhat verify --network $NETWORK $CONTRACT_ADDRESS"
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.0"
   }
 }
