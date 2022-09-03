@@ -1,0 +1,26 @@
+specVersion: 0.0.4
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: PackageMg
+    network: mumbai
+    source:
+      address: "0x4369D69364A3beF266236D6dF65788B5387F7ab8"
+      abi: PackageMg
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - PackageCreated
+        - PackageVersionCreated
+      abis:
+        - name: PackageMg
+          file: ./abis/PackageMg.json
+      eventHandlers:
+        - event: PackageCreated(address,string)
+          handler: handlePackageCreated
+        - event: PackageVersionCreated(string,string,string)
+          handler: handlePackageVersionCreated
+      file: ./src/package-mg.ts
