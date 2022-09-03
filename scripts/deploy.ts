@@ -16,7 +16,6 @@ async function main() {
 
 
 function updateGraphAddress(contractAddr: string, startBlock: number | undefined, local: boolean) {
-  fs.rmSync("subgraph/subgraph.local.yaml")
   fs.copyFileSync("subgraph/subgraph.yaml", "subgraph/subgraph.local.yaml")
   const urlSubgraphLocal = local ? `subgraph/subgraph.local.yaml` : `subgraph/subgraph.yaml`
   const umlSubgraphLocal = yaml.load(fs.readFileSync(urlSubgraphLocal, 'utf8')) as any
