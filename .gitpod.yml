@@ -20,7 +20,7 @@ tasks:
       docker-compose up -d
       sleep 10
       gp sync-done graphnode
-      exit
+      docker-compose -f logs
   - name: Create deploy
     command: |
       gp sync-await depinit

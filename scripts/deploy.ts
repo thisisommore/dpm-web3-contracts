@@ -8,7 +8,8 @@ async function main() {
   const packageManager = await PackageManager.deploy();
 
   await packageManager.deployed();
-
+  await packageManager.createPackage("GenisPackage")
+  await packageManager.releaseNewVersion("GenisPackage", "v0.0.1", "testDataHash")
   console.log(`Package manager deployed to: %s`, packageManager.address);
   updateGraphAddress(packageManager.address, packageManager.deployTransaction.blockNumber, hre.network.name == "localhost")
 

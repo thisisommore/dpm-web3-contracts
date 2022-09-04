@@ -1,6 +1,12 @@
-type ExampleEntity @entity {
-  id: ID!
-  count: BigInt!
+type Package @entity {
+  id: ID! # Package Name
   owner: Bytes! # address
-  pkgName: String! # string
+  releases: [PkgRelease!]! @derivedFrom(field: "pkg")
+}
+
+type PkgRelease @entity{
+  id:ID! # Version Name + Package Name
+  version:String!
+  pkg: Package!
+  dataHash:String!
 }

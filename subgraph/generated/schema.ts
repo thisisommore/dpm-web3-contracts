@@ -11,7 +11,7 @@ import {
   BigDecimal
 } from "@graphprotocol/graph-ts";
 
-export class ExampleEntity extends Entity {
+export class Package extends Entity {
   constructor(id: string) {
     super();
     this.set("id", Value.fromString(id));
@@ -19,18 +19,18 @@ export class ExampleEntity extends Entity {
 
   save(): void {
     let id = this.get("id");
-    assert(id != null, "Cannot save ExampleEntity entity without an ID");
+    assert(id != null, "Cannot save Package entity without an ID");
     if (id) {
       assert(
         id.kind == ValueKind.STRING,
-        `Entities of type ExampleEntity must have an ID of type String but the id '${id.displayData()}' is of type ${id.displayKind()}`
+        `Entities of type Package must have an ID of type String but the id '${id.displayData()}' is of type ${id.displayKind()}`
       );
-      store.set("ExampleEntity", id.toString(), this);
+      store.set("Package", id.toString(), this);
     }
   }
 
-  static load(id: string): ExampleEntity | null {
-    return changetype<ExampleEntity | null>(store.get("ExampleEntity", id));
+  static load(id: string): Package | null {
+    return changetype<Package | null>(store.get("Package", id));
   }
 
   get id(): string {
@@ -42,15 +42,6 @@ export class ExampleEntity extends Entity {
     this.set("id", Value.fromString(value));
   }
 
-  get count(): BigInt {
-    let value = this.get("count");
-    return value!.toBigInt();
-  }
-
-  set count(value: BigInt) {
-    this.set("count", Value.fromBigInt(value));
-  }
-
   get owner(): Bytes {
     let value = this.get("owner");
     return value!.toBytes();
@@ -60,12 +51,71 @@ export class ExampleEntity extends Entity {
     this.set("owner", Value.fromBytes(value));
   }
 
-  get pkgName(): string {
-    let value = this.get("pkgName");
+  get releases(): Array<string> {
+    let value = this.get("releases");
+    return value!.toStringArray();
+  }
+
+  set releases(value: Array<string>) {
+    this.set("releases", Value.fromStringArray(value));
+  }
+}
+
+export class PkgRelease extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id != null, "Cannot save PkgRelease entity without an ID");
+    if (id) {
+      assert(
+        id.kind == ValueKind.STRING,
+        `Entities of type PkgRelease must have an ID of type String but the id '${id.displayData()}' is of type ${id.displayKind()}`
+      );
+      store.set("PkgRelease", id.toString(), this);
+    }
+  }
+
+  static load(id: string): PkgRelease | null {
+    return changetype<PkgRelease | null>(store.get("PkgRelease", id));
+  }
+
+  get id(): string {
+    let value = this.get("id");
     return value!.toString();
   }
 
-  set pkgName(value: string) {
-    this.set("pkgName", Value.fromString(value));
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get version(): string {
+    let value = this.get("version");
+    return value!.toString();
+  }
+
+  set version(value: string) {
+    this.set("version", Value.fromString(value));
+  }
+
+  get pkg(): string {
+    let value = this.get("pkg");
+    return value!.toString();
+  }
+
+  set pkg(value: string) {
+    this.set("pkg", Value.fromString(value));
+  }
+
+  get dataHash(): string {
+    let value = this.get("dataHash");
+    return value!.toString();
+  }
+
+  set dataHash(value: string) {
+    this.set("dataHash", Value.fromString(value));
   }
 }
