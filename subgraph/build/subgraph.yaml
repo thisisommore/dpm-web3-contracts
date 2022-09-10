@@ -6,9 +6,9 @@ dataSources:
     name: PackageMg
     network: mainnet
     source:
-      address: "0x081c78BDcFa10391862E44215543d2B8F3211c92"
+      address: "0x19b73A37bcBD202A939CCa5E3DEaf2C9c7fFf40D"
       abi: PackageMg
-      startBlock: 28026522
+      startBlock: 4
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
