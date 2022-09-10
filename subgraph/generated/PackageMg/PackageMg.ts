@@ -10,6 +10,28 @@ import {
   BigInt
 } from "@graphprotocol/graph-ts";
 
+export class DefaultVersionChanged extends ethereum.Event {
+  get params(): DefaultVersionChanged__Params {
+    return new DefaultVersionChanged__Params(this);
+  }
+}
+
+export class DefaultVersionChanged__Params {
+  _event: DefaultVersionChanged;
+
+  constructor(event: DefaultVersionChanged) {
+    this._event = event;
+  }
+
+  get pkgName(): string {
+    return this._event.parameters[0].value.toString();
+  }
+
+  get versionName(): string {
+    return this._event.parameters[1].value.toString();
+  }
+}
+
 export class PackageCreated extends ethereum.Event {
   get params(): PackageCreated__Params {
     return new PackageCreated__Params(this);
@@ -56,6 +78,35 @@ export class PackageVersionCreated__Params {
   get dataHash(): string {
     return this._event.parameters[2].value.toString();
   }
+
+  get changeDefaultVersion(): boolean {
+    return this._event.parameters[3].value.toBoolean();
+  }
+}
+
+export class PackageMg__nameToPackageResult {
+  value0: Address;
+  value1: string;
+
+  constructor(value0: Address, value1: string) {
+    this.value0 = value0;
+    this.value1 = value1;
+  }
+
+  toMap(): TypedMap<string, ethereum.Value> {
+    let map = new TypedMap<string, ethereum.Value>();
+    map.set("value0", ethereum.Value.fromAddress(this.value0));
+    map.set("value1", ethereum.Value.fromString(this.value1));
+    return map;
+  }
+
+  getOwner(): Address {
+    return this.value0;
+  }
+
+  getDefaultVersion(): string {
+    return this.value1;
+  }
 }
 
 export class PackageMg extends ethereum.SmartContract {
@@ -63,27 +114,69 @@ export class PackageMg extends ethereum.SmartContract {
     return new PackageMg("PackageMg", address);
   }
 
-  nameToPackage(param0: string): Address {
+  getRelease(pkgName: string, pkgVersion: string): string {
+    let result = super.call(
+      "getRelease",
+      "getRelease(string,string):(string)",
+      [
+        ethereum.Value.fromString(pkgName),
+        ethereum.Value.fromString(pkgVersion)
+      ]
+    );
+
+    return result[0].toString();
+  }
+
+  try_getRelease(
+    pkgName: string,
+    pkgVersion: string
+  ): ethereum.CallResult<string> {
+    let result = super.tryCall(
+      "getRelease",
+      "getRelease(string,string):(string)",
+      [
+        ethereum.Value.fromString(pkgName),
+        ethereum.Value.fromString(pkgVersion)
+      ]
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toString());
+  }
+
+  nameToPackage(param0: string): PackageMg__nameToPackageResult {
     let result = super.call(
       "nameToPackage",
-      "nameToPackage(string):(address)",
+      "nameToPackage(string):(address,string)",
       [ethereum.Value.fromString(param0)]
     );
 
-    return result[0].toAddress();
+    return new PackageMg__nameToPackageResult(
+      result[0].toAddress(),
+      result[1].toString()
+    );
   }
 
-  try_nameToPackage(param0: string): ethereum.CallResult<Address> {
+  try_nameToPackage(
+    param0: string
+  ): ethereum.CallResult<PackageMg__nameToPackageResult> {
     let result = super.tryCall(
       "nameToPackage",
-      "nameToPackage(string):(address)",
+      "nameToPackage(string):(address,string)",
       [ethereum.Value.fromString(param0)]
     );
     if (result.reverted) {
       return new ethereum.CallResult();
     }
     let value = result.value;
-    return ethereum.CallResult.fromValue(value[0].toAddress());
+    return ethereum.CallResult.fromValue(
+      new PackageMg__nameToPackageResult(
+        value[0].toAddress(),
+        value[1].toString()
+      )
+    );
   }
 }
 
@@ -145,12 +238,50 @@ export class ReleaseNewVersionCall__Inputs {
   get dataHash(): string {
     return this._call.inputValues[2].value.toString();
   }
+
+  get isDefault(): boolean {
+    return this._call.inputValues[3].value.toBoolean();
+  }
 }
 
 export class ReleaseNewVersionCall__Outputs {
   _call: ReleaseNewVersionCall;
 
   constructor(call: ReleaseNewVersionCall) {
+    this._call = call;
+  }
+}
+
+export class SetDefaultVersionCall extends ethereum.Call {
+  get inputs(): SetDefaultVersionCall__Inputs {
+    return new SetDefaultVersionCall__Inputs(this);
+  }
+
+  get outputs(): SetDefaultVersionCall__Outputs {
+    return new SetDefaultVersionCall__Outputs(this);
+  }
+}
+
+export class SetDefaultVersionCall__Inputs {
+  _call: SetDefaultVersionCall;
+
+  constructor(call: SetDefaultVersionCall) {
+    this._call = call;
+  }
+
+  get packageName(): string {
+    return this._call.inputValues[0].value.toString();
+  }
+
+  get versionName(): string {
+    return this._call.inputValues[1].value.toString();
+  }
+}
+
+export class SetDefaultVersionCall__Outputs {
+  _call: SetDefaultVersionCall;
+
+  constructor(call: SetDefaultVersionCall) {
     this._call = call;
   }
 }

@@ -59,6 +59,15 @@ export class Package extends Entity {
   set releases(value: Array<string>) {
     this.set("releases", Value.fromStringArray(value));
   }
+
+  get defaultVersion(): string {
+    let value = this.get("defaultVersion");
+    return value!.toString();
+  }
+
+  set defaultVersion(value: string) {
+    this.set("defaultVersion", Value.fromString(value));
+  }
 }
 
 export class PkgRelease extends Entity {

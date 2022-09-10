@@ -6,9 +6,9 @@ dataSources:
     name: PackageMg
     network: mainnet
     source:
-      address: "0x67a58a08Da8B385813FE1Ab35230F2A71a3bCC32"
+      address: "0x081c78BDcFa10391862E44215543d2B8F3211c92"
       abi: PackageMg
-      startBlock: 1
+      startBlock: 28026522
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
@@ -16,12 +16,15 @@ dataSources:
       entities:
         - PackageCreated
         - PackageVersionCreated
+        - DefaultVersionChanged(string,string)
       abis:
         - name: PackageMg
           file: PackageMg/abis/PackageMg.json
       eventHandlers:
         - event: PackageCreated(address,string)
           handler: handlePackageCreated
-        - event: PackageVersionCreated(string,string,string)
+        - event: PackageVersionCreated(string,string,string,bool)
           handler: handlePackageVersionCreated
+        - event: DefaultVersionChanged(string,string)
+          handler: handleDefaultVersionChanged
       file: PackageMg/PackageMg.wasm

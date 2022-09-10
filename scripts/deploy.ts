@@ -6,10 +6,12 @@ async function main() {
 
   const PackageManager = await ethers.getContractFactory("PackageManager");
   const packageManager = await PackageManager.deploy();
+  if (hre.network.name == "localhost") {
+    await packageManager.deployed();
+    await packageManager.createPackage("GenisPackage")
+    await packageManager.releaseNewVersion("GenisPackage", "v0.0.1", "testDataHash", true)
+  }
 
-  await packageManager.deployed();
-  await packageManager.createPackage("GenisPackage")
-  await packageManager.releaseNewVersion("GenisPackage", "v0.0.1", "testDataHash")
   console.log(`Package manager deployed to: %s`, packageManager.address);
   updateGraphAddress(packageManager.address, packageManager.deployTransaction.blockNumber, hre.network.name == "localhost")
 

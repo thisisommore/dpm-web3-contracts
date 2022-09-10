@@ -2,6 +2,7 @@ type Package @entity {
   id: ID! # Package Name
   owner: Bytes! # address
   releases: [PkgRelease!]! @derivedFrom(field: "pkg")
+  defaultVersion: PkgRelease!
 }
 
 type PkgRelease @entity{
