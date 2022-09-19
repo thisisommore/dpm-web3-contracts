@@ -1,17 +1,39 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-pragma solidity ^0.8.11;
+pragma solidity ^0.8.9;
+import "@openzeppelin/contracts/utils/Context.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Pausable.sol";
 
-// Uncomment this line to use console.log
-// import "hardhat/console.sol";
+contract PackageManager is
+    Context,
+    AccessControlEnumerable,
+    ERC721Enumerable,
+    ERC721Burnable,
+    ERC721Pausable
+{
+    using Counters for Counters.Counter;
 
-contract PackageManager {
+    constructor(string memory name, string memory symbol)
+        ERC721(name, symbol)
+    {}
+
+    mapping(uint256 => string) private _tokenURIs;
     struct Package {
         address owner;
         string defaultVersion;
         mapping(string => string) versionToDataHash;
     }
 
-    event PackageCreated(address owner, string pkgName);
+    event PackageCreated(
+        uint256 tokenID,
+        string metaDataHash,
+        address owner,
+        string pkgName
+    );
     event PackageVersionCreated(
         string pkgName,
         string versionName,
@@ -20,12 +42,11 @@ contract PackageManager {
     );
 
     event DefaultVersionChanged(string pkgName, string versionName);
-
     mapping(string => Package) public nameToPackage;
 
     modifier onlyPackageOwner(string memory packageName) {
         address packageOwner = nameToPackage[packageName].owner;
-        require(msg.sender == packageOwner, "sender is not owner of package");
+        require(_msgSender() == packageOwner, "sender is not owner of package");
         _;
     }
 
@@ -57,6 +78,9 @@ contract PackageManager {
         _;
     }
 
+    /**
+     * @dev Returns data hash of the release specified
+     */
     function getRelease(string memory pkgName, string memory pkgVersion)
         public
         view
@@ -66,18 +90,39 @@ contract PackageManager {
         return nameToPackage[pkgName].versionToDataHash[pkgVersion];
     }
 
-    function createPackage(string memory packageName)
-        public
-        onlyPackageNotExist(packageName)
-    {
+    Counters.Counter public _tokenIdTracker;
+
+    /**
+     * @dev Creates package with the name and metadataHash for the Soulbound NFT
+     */
+    function createPackage(
+        string memory packageName,
+        string memory metadataHash
+    ) public onlyPackageNotExist(packageName) returns (uint256) {
         require(
             bytes(packageName).length != 0,
             "package name cannot be empty string"
         );
-        nameToPackage[packageName].owner = msg.sender;
-        emit PackageCreated(msg.sender, packageName);
+        nameToPackage[packageName].owner = _msgSender();
+
+        // We cannot just use balanceOf to create the new tokenId because tokens
+        // can be burned (destroyed), so we need a separate counter.
+        _tokenIdTracker.increment();
+        uint256 currentTokenID = _tokenIdTracker.current();
+        _safeMint(_msgSender(), currentTokenID);
+        _setTokenURI(currentTokenID, metadataHash);
+        emit PackageCreated(
+            currentTokenID,
+            metadataHash,
+            _msgSender(),
+            packageName
+        );
+        return currentTokenID;
     }
 
+    /**
+     * @dev Creates new release for the specified package.
+     */
     function releaseNewVersion(
         string memory packageName,
         string memory versionName,
@@ -111,6 +156,9 @@ contract PackageManager {
         );
     }
 
+    /**
+     * @dev Sets default version for package which can be used by client to fetch, mainly to fetch latest stable releaase.
+     */
     function setDefaultVersion(
         string memory packageName,
         string memory versionName
@@ -121,5 +169,57 @@ contract PackageManager {
     {
         nameToPackage[packageName].defaultVersion = versionName;
         emit DefaultVersionChanged(packageName, versionName);
+    }
+
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        virtual
+        override(AccessControlEnumerable, ERC721, ERC721Enumerable)
+        returns (bool)
+    {
+        return super.supportsInterface(interfaceId);
+    }
+
+    /**
+     * @dev Restricts NFT transfer unless it is mint transfer from null address.
+     */
+    function _beforeTokenTransfer(
+        address from,
+        address to,
+        uint256 tokenId
+    ) internal virtual override(ERC721, ERC721Enumerable, ERC721Pausable) {
+        require(from == address(0), "NFT is Soulbound");
+    }
+
+    /**
+     * @dev See {IERC721Metadata-tokenURI}.
+     */
+    function tokenURI(uint256 tokenId)
+        public
+        view
+        virtual
+        override
+        returns (string memory)
+    {
+        require(_exists(tokenId), "Creatify: Non-Existent Artifact");
+        string memory _tokenURI = _tokenURIs[tokenId];
+
+        return _tokenURI;
+    }
+
+    /**
+     * @dev Sets `_tokenURI` as the tokenURI of `tokenId`.
+     *
+     * Requirements:
+     *
+     * - `tokenId` must exist.
+     */
+    function _setTokenURI(uint256 tokenId, string memory _tokenURI)
+        internal
+        virtual
+    {
+        require(_exists(tokenId), "Creatify: Non-Existent Artifact");
+        _tokenURIs[tokenId] = _tokenURI;
     }
 }

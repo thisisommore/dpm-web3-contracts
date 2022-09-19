@@ -12,6 +12,7 @@
     "verify": "npx hardhat verify --network $NETWORK $CONTRACT_ADDRESS"
   },
   "dependencies": {
+    "@openzeppelin/contracts": "^4.7.3",
     "js-yaml": "^4.1.0"
   }
 }
