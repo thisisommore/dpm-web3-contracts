@@ -5,10 +5,10 @@ import hre from "hardhat"
 async function main() {
 
   const PackageManager = await ethers.getContractFactory("PackageManager");
-  const packageManager = await PackageManager.deploy();
+  const packageManager = await PackageManager.deploy("DPM", "DPM");
   if (hre.network.name == "localhost") {
     await packageManager.deployed();
-    await packageManager.createPackage("GenisPackage")
+    await packageManager.createPackage("GenisPackage", "metadatahash")
     await packageManager.releaseNewVersion("GenisPackage", "v0.0.1", "testDataHash", true)
   }
 
@@ -22,7 +22,6 @@ function updateGraphAddress(contractAddr: string, startBlock: number | undefined
   fs.copyFileSync("subgraph/subgraph.yaml", "subgraph/subgraph.local.yaml")
   const urlSubgraphLocal = local ? `subgraph/subgraph.local.yaml` : `subgraph/subgraph.yaml`
   const umlSubgraphLocal = yaml.load(fs.readFileSync(urlSubgraphLocal, 'utf8')) as any
-  umlSubgraphLocal.dataSources[0].network = "mainnet"
   umlSubgraphLocal.dataSources[0].source.address = contractAddr
 
   if (startBlock) {
