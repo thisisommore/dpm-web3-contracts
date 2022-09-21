@@ -23,6 +23,9 @@ function updateGraphAddress(contractAddr: string, startBlock: number | undefined
   const urlSubgraphLocal = local ? `subgraph/subgraph.local.yaml` : `subgraph/subgraph.yaml`
   const umlSubgraphLocal = yaml.load(fs.readFileSync(urlSubgraphLocal, 'utf8')) as any
   umlSubgraphLocal.dataSources[0].source.address = contractAddr
+  if (local) {
+    umlSubgraphLocal.dataSources[0].network = "mainnet"
+  }
 
   if (startBlock) {
     umlSubgraphLocal.dataSources[0].source.startBlock = startBlock

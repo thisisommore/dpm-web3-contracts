@@ -9,7 +9,7 @@
     "compile": "hardhat compile",
     "test": "hardhat test",
     "deploy": "hardhat run scripts/deploy.ts --network $NETWORK",
-    "verify": "npx hardhat verify --network $NETWORK $CONTRACT_ADDRESS"
+    "verify": "npx hardhat verify --network $NETWORK $CONTRACT_ADDRESS DPM DPM"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.7.3",
